@@ -23,7 +23,21 @@ window.onload = function() {
 };
 
 function game() {
-	var walker = Crafty.e('2D, Canvas, walker_start, SpriteAnimation');
+	var walker = Crafty.e('2D, Canvas, walker_start, SpriteAnimation, Collision, Gravity, Twoway')
+        .collision()
+        .bind('Moved', function(e) {
+            var hitDatas, hitData;
+            if ((hitDatas = this.hit('Solid'))) {
+                hitData = hitDatas[0];
+                if (hitData.obj.has("Green") || hitData.obj.has("Floor")) {
+                    this._falling = false;
+                    this.x -= hitData.overlap * hitData.normal.x;
+                    this.y -= hitData.overlap * hitData.normal.y;
+                }
+            }
+        })
+        .twoway(200)
+        .gravity('Solid')
 	walker.reel("walking", 500, [
 		[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [8, 0], [10, 0]
 	]);
