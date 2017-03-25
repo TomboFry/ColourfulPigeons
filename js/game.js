@@ -70,10 +70,8 @@ function game() {
 
 	walker.player_colour = "Purple";
 
-	console.log(walker);
-
 	Crafty.e("2D, Canvas, Solid, Floor, Collision, Color")
-		.attr({ x: 0, y: 350, w: 640, h: 10 })
+		.attr({ x: 0, y: 350, w: 1280, h: 10 })
 		.color('black')
 		.collision();
 
@@ -81,4 +79,7 @@ function game() {
 		.attr({ x: 480, y: 0, w: 20, h: 350 })
 		.color('orange')
 		.collision();
+    Crafty.viewport.bounds = {min:{x:0, y:0}, max:{x:+Infinity, y:360}};
+    Crafty.viewport.scale(1);
+    Crafty.viewport.follow(walker, 0, 0);
 }
