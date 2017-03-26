@@ -2,6 +2,7 @@ HEIGHT = 320
 WIDTH = 570
 BLOCKSIZE = 64
 TIME = 30
+SCORE = 0
 last_update = 0
 timer = TIME
 TileTypes = [
@@ -19,6 +20,7 @@ sect3 = [[0,0,0,0,1], [0,0,0,0,1], [2,3,3,4,1], [2,3,3,4,1],  [2,3,3,4,1], [2,3,
 sects = [sect1, sect2, sect3];
 
 var assetsObj = {
+	"images": [ "images/highscore_new.png", "images/clock.png" ],
 	"sprites": {
 		"images/spr_walk_orange.png": {
 			tile: 64,
@@ -67,15 +69,38 @@ var assetsObj = {
 				Purple_tile_1: [7, 1],
 				Purple_tile_2: [8, 1]
 			}
+		},
+		"images/title_strip26.png": {
+			tile: 502, tileh: 162, map: { title_sprite: [0, 0] }
 		}
 	}
 };
 
 window.onload = function() {
+
+	var viewFullScreen = document.getElementById("game");
+	if (viewFullScreen) {
+		viewFullScreen.addEventListener("click", function () {
+			var docElm = document.documentElement;
+			if (docElm.requestFullscreen) {
+				docElm.requestFullscreen();
+			}
+			else if (docElm.msRequestFullscreen) {
+				docElm.msRequestFullscreen();
+			}
+			else if (docElm.mozRequestFullScreen) {
+				docElm.mozRequestFullScreen();
+			}
+			else if (docElm.webkitRequestFullScreen) {
+				docElm.webkitRequestFullScreen();
+			}
+		});
+	}
+
 	Crafty.init(WIDTH, HEIGHT, document.getElementById('game'));
 	Crafty.background('#3FA9F5');
 	Crafty.load(assetsObj, function () {
-		Crafty.enterScene("game");
+		Crafty.enterScene("title");
 	});
 	resizeWindow();
 };
@@ -92,6 +117,9 @@ function resizeWindow() {
 }
 
 Crafty.defineScene("game", function() {
+
+	SCORE = 0
+
     last_update = 0;
 	Crafty.background("#3FA9F5 url(images/hillside.png) repeat-x");
 
@@ -150,29 +178,51 @@ Crafty.defineScene("game", function() {
     walker.vx = 50;
     walker.ax = 30;
 
-	/*for (var i = 0; i < 1280; i+=64) {
-		Crafty.e("2D, Canvas, Solid, Collision, Floor, grass_tiles_0")
-			.sprite(0, 0)
-			.attr({ x: i, y: HEIGHT - 64, w: 64, h: 64 })
-			.collision();
-    }*/
     createSection(0, 0, sect1);
 
-    //createWall("Orange", 480, HEIGHT - 64);
+    Crafty.e("2D, DOM, Image")
+    	.attr({ x: 64, y: 16, w: 64, h:64 })
+    	.image("images/clock.png")
+    	.bind("EnterFrame", function() {
+    		this.x = -Crafty.viewport._x + 64;
+    	});
+
+    Crafty.e("2D, DOM, Text")
+		.attr({ x: 80, y: 16})
+		.text(function () { return timer.toFixed(1) })
+		.textColor("#FFF")
+		.textAlign("left")
+		.textFont({ size: '20px', weight: 'bold', family: "Montserrat" })
+		.bind("EnterFrame", function() {
+    		this.x = -Crafty.viewport._x + 92;
+    	})
+		.dynamicTextGeneration(true);
+
+	var scoreText = Crafty.e("2D, DOM, Text")
+		.attr({ x: WIDTH - 16, y: 16})
+		.text(function () { return Math.round(walker.x) })
+		.textColor("#FFF")
+		.textFont({ size: '36px', weight: '900', family: "Montserrat" })
+		.css({ "text-align": "right" })
+		.bind("EnterFrame", function() {
+    		this.x = -Crafty.viewport._x + WIDTH - 128;
+    	})
+		.dynamicTextGeneration(true);
 
     Crafty.viewport.bounds = {min:{x:0, y:0}, max:{x:+Infinity, y:HEIGHT}};
     Crafty.viewport.scale(1);
-    Crafty.viewport.follow(walker, 0, 0);
+    Crafty.viewport.follow(walker, -100, 0);
+
     tick = setInterval(function(){
-        if(timer > 1) {
-            timer -= 1;
-            console.log(timer);
+        if(timer > 0.1) {
+            timer -= 0.1;
         } else {
             timer = TIME;
             clearInterval(tick);
-            Crafty.enterScene("game");
+            SCORE = walker.x;
+            Crafty.enterScene("gameend");
         }
-}, 1000);
+	}, 100);
 });
 
 function createWall(colour, x, y) {

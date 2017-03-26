@@ -1,16 +1,10 @@
-var assetsObj = {
-	"sprites": {
-		"images/title_strip26.png": {
-			tile: 502, tileh: 162,
-			map: { title: [0, 0] }
-		}
-	}
-}
+var sinRot = 0;
 
 Crafty.defineScene("title", function() {
+
 	Crafty.background('#3FA9F5 url(images/hillside.png) repeat-x');
 
-	var title = Crafty.e('2D, Canvas, SpriteAnimation, title')
+	var title = Crafty.e('2D, Canvas, SpriteAnimation, title_sprite, Mouse')
 		.attr({ x: 34, y: -162, w: 502, h: 162 })
         .reel("splash", 1000, [
 			[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0],
@@ -23,36 +17,102 @@ Crafty.defineScene("title", function() {
 		})
 		.bind("KeyDown", function(e) {
 			if (e.key == Crafty.keys.ENTER) {
-				Crafty.enterScene("gameend");
+				Crafty.enterScene("game");
 			}
-		})
+		});
+
+	Crafty.e("2D, Canvas, Text")
+		.attr({ x: WIDTH / 2, y: 248})
+		.text("Press ENTER to Start!")
+		.textColor("#FFF")
+		.textAlign("center")
+		.textFont({ size: '20px', weight: 'bold', family: "Montserrat" })
+
+	Crafty.e("2D, Canvas, Text")
+		.attr({ x: WIDTH / 2, y: 270})
+		.text("Controls: Z = Blue, X = Orange, C = Purple")
+		.textColor("#FFF")
+		.textAlign("center")
+		.textFont({ size: '20px', weight: 'bold', family: "Montserrat" })
 });
 
 Crafty.defineScene("gameend", function() {
-	Crafty.e("2D, DOM, Text")
-          .attr({ w: 100, h: 20, x: 150, y: 120 })
-          .text("Game Over!")
-          .css({ "border": "1px solid red"})
-          .textColor("#FFFFFF");
-})
 
-window.onload = function() {
-	resizeWindow();
-	Crafty.init(570, 320, document.getElementById('game'));
-	Crafty.load(assetsObj, function() {
-		Crafty.enterScene("title");
-	});
-}
+	var highscore = 0;
+	var hasHighscore = false;
+	if (localStorage.getItem("highscore")) {
+		highscore = localStorage.getItem("highscore");
+	}
+	if (SCORE > highscore) {
+		localStorage.setItem("highscore", SCORE)
+		hasHighscore = true;
+		highscore = SCORE
+	}
+
+	Crafty.e("2D, Canvas, Text")
+		.attr({ x: WIDTH / 2, y: 16 })
+		.text("GAME OVER!")
+		.textColor("#FFF")
+		.textAlign("center")
+		.textFont({ size: "42px", weight: "900", family: "Montserrat" })
+
+	setTimeout(function() {
+		Crafty.e("2D, Canvas, Text")
+			.attr({ x: WIDTH / 2, y: 70 })
+			.text("Your Score:")
+			.textColor("#FFF")
+			.textAlign("center")
+			.textFont({ size: "28px", weight: "700", family: "Montserrat" })
+
+		Crafty.e("2D, Canvas, Text")
+			.attr({ x: WIDTH / 2, y: 92 })
+			.text(Math.round(SCORE))
+			.textColor("#FFF")
+			.textAlign("center")
+			.textFont({ size: "64px", weight: "900", family: "Montserrat" })
+	}, 1000)
+
+	setTimeout(function() {
+		Crafty.e("2D, Canvas, Text")
+			.attr({ x: WIDTH / 2, y: 160 })
+			.text("Your Highscore:")
+			.textColor("#FFF")
+			.textAlign("center")
+			.textFont({ size: "28px", weight: "700", family: "Montserrat" })
+
+		Crafty.e("2D, Canvas, Text")
+			.attr({ x: WIDTH / 2, y: 182 })
+			.text(Math.round(highscore))
+			.textColor("#FFF")
+			.textAlign("center")
+			.textFont({ size: "64px", weight: "900", family: "Montserrat" })
+
+		if (hasHighscore) {
+			Crafty.e("2D, Canvas, Image")
+				.attr({ x: (WIDTH / 2) - 160, y: 166, w: 32, h: 16 })
+				.image("images/highscore_new.png")
+				.bind("EnterFrame", function() {
+					sinRot += 0.1;
+					this.rotation = Math.sin(sinRot) * 8;
+				});
+		}
+	}, 2000);
+
+	setTimeout(function() {
+		Crafty.e("2D, Canvas, Text")
+			.attr({ x: WIDTH / 2, y: 270})
+			.text("Press ENTER to play again")
+			.textColor("#FFF")
+			.textAlign("center")
+			.textFont({ size: '20px', weight: 'bold', family: "Montserrat" })
+			.bind("KeyDown", function(e) {
+				if (e.key == Crafty.keys.ENTER) {
+					Crafty.enterScene("game")
+				}
+			});
+	}, 2500);
+});
 
 function lerp(v0, v1, t) {
     return v0 * (1 - t) + v1 * t
-}
-
-window.onresize = resizeWindow;
-function resizeWindow() {
-	var canvas = document.getElementById('game');
-	var scale = window.innerHeight / 320;
-	console.log(scale);
-	canvas.style.transformOrigin = "0 0";
-	canvas.style.transform = "scale(" + scale + ")";
 }
