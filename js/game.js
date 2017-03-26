@@ -1,4 +1,5 @@
 var assetsObj = {
+	"images": [ "images/hillside.png" ],
 	"sprites": {
 		"images/spr_walk_orange.png": {
 			tile: 64,
@@ -20,17 +21,59 @@ var assetsObj = {
 			map: {
 				Purple: [0, 0],
 			}
+		},
+		"images/tileset_grass.png": {
+			tile: 64, tileh: 64,
+			map: {
+				grass_tiles_0: [0, 0],
+				grass_tiles_1: [1, 0],
+				grass_tiles_2: [2, 0],
+				grass_tiles_3: [3, 0],
+				grass_tiles_4: [4, 0],
+				grass_tiles_5: [5, 0],
+				grass_tiles_6: [6, 0],
+				grass_tiles_7: [7, 0],
+				grass_tiles_8: [8, 0],
+				grass_tiles_9: [9, 0],
+				grass_tiles_10: [10, 0],
+				grass_tiles_11: [11, 0],
+				grass_tiles_12: [12, 0],
+				orange_tile_0: [0, 1],
+				orange_tile_1: [1, 1],
+				orange_tile_2: [2, 1]
+			}
 		}
 	}
 };
 
 window.onload = function() {
 	Crafty.init(640, 360, document.getElementById('game'));
+	Crafty.background('#3FA9F5');
 	Crafty.load(assetsObj, game);
+	resizeWindow();
 };
 
+// Will scale the canvas to the size of the window
+// (based on height, you'll have a bad time if your aspect ratio is less 16:9)
+window.onresize = resizeWindow;
+function resizeWindow() {
+	var canvas = document.getElementById('game');
+	var scale = window.innerHeight / 360;
+	console.log(scale);
+	canvas.style.transformOrigin = "0 0";
+	canvas.style.transform = "scale(" + scale + ")";
+}
+
 function game() {
-	var walker = Crafty.e('2D, Canvas, Purple, SpriteAnimation, Collision, Gravity, Jumper, Motion')
+
+	var hillside = Crafty.e('2D, Canvas, Image')
+		.image("images/hillside.png")
+		.bind("EnterFrame", function(e) {
+			this.x = Crafty.viewport.x / 8;
+		})
+		.alpha = 0.5;
+
+	var walker = Crafty.e('2D, Canvas, Blue, SpriteAnimation, Collision, Gravity, Jumper, Motion')
         .collision()
         .bind('Moved', function(e) {
             var hitDatas, hitData;
@@ -40,7 +83,8 @@ function game() {
                     this.x -= hitData.overlap * hitData.normal.x;
                     this.y -= hitData.overlap * hitData.normal.y;
                 } else if (!hitData.obj.has(walker.player_colour)) {
-                    this.velocity().x = 50;
+                    this.vx = 50;
+                    this.animationSpeed = 0;
                     this.x -= hitData.overlap * hitData.normal.x;
                     this.y -= hitData.overlap * hitData.normal.y;
                 }
@@ -53,38 +97,48 @@ function game() {
 		])
 		.animate("walking", -1)
 		.bind('KeyDown', function(e) {
-			if(e.key == Crafty.keys.Z) {
+			if (e.key == Crafty.keys.Z || e.key == Crafty.keys.X || e.key == Crafty.keys.C) {
 				walker.removeComponent("Orange");
 				walker.removeComponent("Purple");
+				walker.removeComponent("Blue");
+			}
+
+			if (e.key == Crafty.keys.Z) {
 				walker.addComponent("Blue");
 				walker.player_colour = "Blue";
-			} else if(e.key == Crafty.keys.X) {
-				walker.removeComponent("Purple");
-				walker.removeComponent("Blue");
+			} else if (e.key == Crafty.keys.X) {
 				walker.addComponent("Orange");
 				walker.player_colour = "Orange";
-			} else if(e.key == Crafty.keys.C) {
-				walker.removeComponent("Orange");
-				walker.removeComponent("Blue");
+			} else if (e.key == Crafty.keys.C) {
 				walker.addComponent("Purple");
 				walker.player_colour = "Purple";
 			}
+		}).bind("EnterFrame", function(evt) {
+			this.animationSpeed = this.vx / 200;
 		});
 
-	walker.player_colour = "Purple";
-    walker.velocity().x = 50;
+	walker.player_colour = "Blue";
+    walker.vx = 50;
     walker.ax = 30;
 
-	Crafty.e("2D, Canvas, Solid, Floor, Collision, Color")
-		.attr({ x: 0, y: 350, w: 1280, h: 10 })
-		.color('black')
-		.collision();
+	for (var i = 0; i < 1280; i+=64) {
+		Crafty.e("2D, Canvas, Solid, Collision, Floor, grass_tiles_0")
+			.sprite(0, 0)
+			.attr({ x: i, y: 360 - 64, w: 64, h: 64 })
+			.collision();
+    }
 
-	Crafty.e("2D, Canvas, Solid, Collision, Orange, Color")
-		.attr({ x: 480, y: 0, w: 20, h: 350 })
-		.color('orange')
-		.collision();
+    createWall("Orange", 480, 296);
+
     Crafty.viewport.bounds = {min:{x:0, y:0}, max:{x:+Infinity, y:360}};
     Crafty.viewport.scale(1);
     Crafty.viewport.follow(walker, 0, 0);
+}
+
+function createWall(colour, x, y) {
+	for (var i = 0; i < 3; i++) {
+		Crafty.e("2D, Canvas, Solid, Collision, " + colour + ", " + colour.toLowerCase() + "_tile_" + i)
+			.attr({ x: x, y: y - 192 + (i * 64), w: 64, h: 64 })
+			.collision();
+	}
 }
