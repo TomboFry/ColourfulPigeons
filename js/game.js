@@ -12,6 +12,12 @@ TileTypes = [
 ]
 sect1 = [[0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,2,3,4,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1]]
 
+sect2 = [[0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,5,6,7,1],  [0,0,0,0,1], [0,0,0,0,1],[0,8,9,10,1],  [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [8,9,9,10,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1]]
+
+sect3 = [[0,0,0,0,1], [0,0,0,0,1], [2,3,3,4,1], [2,3,3,4,1],  [2,3,3,4,1], [2,3,3,4,1],[0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [5,6,6,7,1], [5,6,6,7,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [8,9,9,10,1], [8,9,9,10,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1]]
+
+sects = [sect1, sect2, sect3];
+
 var assetsObj = {
 	"sprites": {
 		"images/spr_walk_orange.png": {
@@ -86,7 +92,7 @@ function resizeWindow() {
 }
 
 Crafty.defineScene("game", function() {
-
+    last_update = 0;
 	Crafty.background("#3FA9F5 url(images/hillside.png) repeat-x");
 
 	var walker = Crafty.e('2D, Canvas, Blue, SpriteAnimation, Collision, Gravity, Jumper, Motion')
@@ -134,7 +140,7 @@ Crafty.defineScene("game", function() {
 			Crafty.stage.elem.style.backgroundPosition = (Crafty.viewport._x / 10) + "px -40px";
             if (this.x > last_update + WIDTH) {
                 new_loc = last_update + WIDTH * 2;
-                createSection(last_update + WIDTH * 2, 0, sect1)
+                createSection(last_update + WIDTH * 2, 0, sects[Math.floor(Math.random()*sects.length)])
                 last_update = new_loc
                 console.log(timer)
             }
