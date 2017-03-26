@@ -1,3 +1,10 @@
+HEIGHT = 320
+WIDTH = 570
+BLOCKSIZE = 64
+last_update = 0
+TileTypes = [" ", "Floor, grass_tiles_0", "Orange, orange_tile_0", "Orange, orange_tile_1", "Orange, orange_tile_2"]
+sect1 = [[0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,2,3,4,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1]]
+
 var assetsObj = {
 	"images": [ "images/hillside.png" ],
 	"sprites": {
@@ -47,7 +54,7 @@ var assetsObj = {
 };
 
 window.onload = function() {
-	Crafty.init(640, 360, document.getElementById('game'));
+	Crafty.init(WIDTH, HEIGHT, document.getElementById('game'));
 	Crafty.background('#3FA9F5');
 	Crafty.load(assetsObj, game);
 	resizeWindow();
@@ -58,7 +65,7 @@ window.onload = function() {
 window.onresize = resizeWindow;
 function resizeWindow() {
 	var canvas = document.getElementById('game');
-	var scale = window.innerHeight / 360;
+	var scale = window.innerHeight / HEIGHT;
 	console.log(scale);
 	canvas.style.transformOrigin = "0 0";
 	canvas.style.transform = "scale(" + scale + ")";
@@ -83,7 +90,7 @@ function game() {
                     this.x -= hitData.overlap * hitData.normal.x;
                     this.y -= hitData.overlap * hitData.normal.y;
                 } else if (!hitData.obj.has(walker.player_colour)) {
-                    this.vx = 50;
+                    this.vx = 0;
                     this.animationSpeed = 0;
                     this.x -= hitData.overlap * hitData.normal.x;
                     this.y -= hitData.overlap * hitData.normal.y;
@@ -115,22 +122,28 @@ function game() {
 			}
 		}).bind("EnterFrame", function(evt) {
 			this.animationSpeed = this.vx / 200;
+            if (this.x > last_update + WIDTH) {
+                new_loc = last_update + WIDTH * 2;
+                createSection(last_update + WIDTH * 2, 0, sect1)
+                last_update = new_loc
+            }
 		});
 
 	walker.player_colour = "Blue";
     walker.vx = 50;
     walker.ax = 30;
 
-	for (var i = 0; i < 1280; i+=64) {
+	/*for (var i = 0; i < 1280; i+=64) {
 		Crafty.e("2D, Canvas, Solid, Collision, Floor, grass_tiles_0")
 			.sprite(0, 0)
-			.attr({ x: i, y: 360 - 64, w: 64, h: 64 })
+			.attr({ x: i, y: HEIGHT - 64, w: 64, h: 64 })
 			.collision();
-    }
+    }*/
+    createSection(0, 0, sect1);
 
-    createWall("Orange", 480, 296);
+    //createWall("Orange", 480, HEIGHT - 64);
 
-    Crafty.viewport.bounds = {min:{x:0, y:0}, max:{x:+Infinity, y:360}};
+    Crafty.viewport.bounds = {min:{x:0, y:0}, max:{x:+Infinity, y:HEIGHT}};
     Crafty.viewport.scale(1);
     Crafty.viewport.follow(walker, 0, 0);
 }
@@ -141,4 +154,18 @@ function createWall(colour, x, y) {
 			.attr({ x: x, y: y - 192 + (i * 64), w: 64, h: 64 })
 			.collision();
 	}
+}
+
+function createSection(x, y, arr) {
+    for (var i = 0; i < 2 * (WIDTH + 6) / BLOCKSIZE; i++) {
+        for (var j = 0; j < HEIGHT / BLOCKSIZE; j++) {
+            type = TileTypes[arr[i][j]]
+            if (type !== " ") {
+                console.log(type)
+                Crafty.e("2D, Canvas, Solid, Collision, " + type)
+                    .attr({x: i * BLOCKSIZE + x, y: j * BLOCKSIZE + y, w: BLOCKSIZE, h: BLOCKSIZE})
+                    .collision();
+            }
+        }
+    }
 }
