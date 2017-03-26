@@ -1,7 +1,9 @@
 HEIGHT = 320
 WIDTH = 570
 BLOCKSIZE = 64
+TIME = 30
 last_update = 0
+timer = TIME
 TileTypes = [
 	" ", "Floor, grass_tiles_0",
 	"Orange, Orange_tile_0", "Orange, Orange_tile_1", "Orange, Orange_tile_2",
@@ -134,6 +136,7 @@ Crafty.defineScene("game", function() {
                 new_loc = last_update + WIDTH * 2;
                 createSection(last_update + WIDTH * 2, 0, sect1)
                 last_update = new_loc
+                console.log(timer)
             }
 		});
 
@@ -154,6 +157,16 @@ Crafty.defineScene("game", function() {
     Crafty.viewport.bounds = {min:{x:0, y:0}, max:{x:+Infinity, y:HEIGHT}};
     Crafty.viewport.scale(1);
     Crafty.viewport.follow(walker, 0, 0);
+    tick = setInterval(function(){
+        if(timer > 1) {
+            timer -= 1;
+            console.log(timer);
+        } else {
+            timer = TIME;
+            clearInterval(tick);
+            Crafty.enterScene("game");
+        }
+}, 1000);
 });
 
 function createWall(colour, x, y) {
