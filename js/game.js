@@ -2,11 +2,15 @@ HEIGHT = 320
 WIDTH = 570
 BLOCKSIZE = 64
 last_update = 0
-TileTypes = [" ", "Floor, grass_tiles_0", "Orange, orange_tile_0", "Orange, orange_tile_1", "Orange, orange_tile_2"]
+TileTypes = [
+	" ", "Floor, grass_tiles_0",
+	"Orange, Orange_tile_0", "Orange, Orange_tile_1", "Orange, Orange_tile_2",
+	"Blue, Blue_tile_0",     "Blue, Blue_tile_1",     "Blue, Blue_tile_2",
+	"Purple, Purple_tile_0", "Purple, Purple_tile_1", "Purple, Purple_tile_2"
+]
 sect1 = [[0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,2,3,4,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,1]]
 
 var assetsObj = {
-	"images": [ "images/hillside.png" ],
 	"sprites": {
 		"images/spr_walk_orange.png": {
 			tile: 64,
@@ -45,9 +49,15 @@ var assetsObj = {
 				grass_tiles_10: [10, 0],
 				grass_tiles_11: [11, 0],
 				grass_tiles_12: [12, 0],
-				orange_tile_0: [0, 1],
-				orange_tile_1: [1, 1],
-				orange_tile_2: [2, 1]
+				Orange_tile_0: [0, 1],
+				Orange_tile_1: [1, 1],
+				Orange_tile_2: [2, 1],
+				Blue_tile_0: [3, 1],
+				Blue_tile_1: [4, 1],
+				Blue_tile_2: [5, 1],
+				Purple_tile_0: [6, 1],
+				Purple_tile_1: [7, 1],
+				Purple_tile_2: [8, 1]
 			}
 		}
 	}
@@ -56,7 +66,9 @@ var assetsObj = {
 window.onload = function() {
 	Crafty.init(WIDTH, HEIGHT, document.getElementById('game'));
 	Crafty.background('#3FA9F5');
-	Crafty.load(assetsObj, game);
+	Crafty.load(assetsObj, function () {
+		Crafty.enterScene("game");
+	});
 	resizeWindow();
 };
 
@@ -71,14 +83,9 @@ function resizeWindow() {
 	canvas.style.transform = "scale(" + scale + ")";
 }
 
-function game() {
+Crafty.defineScene("game", function() {
 
-	var hillside = Crafty.e('2D, Canvas, Image')
-		.image("images/hillside.png")
-		.bind("EnterFrame", function(e) {
-			this.x = Crafty.viewport.x / 8;
-		})
-		.alpha = 0.5;
+	Crafty.background("#3FA9F5 url(images/hillside.png) repeat-x");
 
 	var walker = Crafty.e('2D, Canvas, Blue, SpriteAnimation, Collision, Gravity, Jumper, Motion')
         .collision()
@@ -122,6 +129,7 @@ function game() {
 			}
 		}).bind("EnterFrame", function(evt) {
 			this.animationSpeed = this.vx / 200;
+			Crafty.stage.elem.style.backgroundPosition = (Crafty.viewport._x / 10) + "px -40px";
             if (this.x > last_update + WIDTH) {
                 new_loc = last_update + WIDTH * 2;
                 createSection(last_update + WIDTH * 2, 0, sect1)
@@ -146,11 +154,11 @@ function game() {
     Crafty.viewport.bounds = {min:{x:0, y:0}, max:{x:+Infinity, y:HEIGHT}};
     Crafty.viewport.scale(1);
     Crafty.viewport.follow(walker, 0, 0);
-}
+});
 
 function createWall(colour, x, y) {
 	for (var i = 0; i < 3; i++) {
-		Crafty.e("2D, Canvas, Solid, Collision, " + colour + ", " + colour.toLowerCase() + "_tile_" + i)
+		Crafty.e("2D, Canvas, Solid, Collision, " + colour + ", " + colour + "_tile_" + i)
 			.attr({ x: x, y: y - 192 + (i * 64), w: 64, h: 64 })
 			.collision();
 	}
