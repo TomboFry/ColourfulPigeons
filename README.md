@@ -2,7 +2,12 @@
 
 A game about a colour changing pigeon who can only walk through walls of the same colour.
 
+## Play Now:
 
-###### "Revolutionary. 4.5/5" ~ Person
+[http://colourfulpigeons.com](http://colourfulpigeons.com)
 
-###### "The best thing since sliced bread. 4/5" ~ Other Person
+## [Obviously Not Made Up] Reviews: 
+
+> "Revolutionary. 4.5/5" ~ Person
+
+> "The best thing since sliced bread. 4/5" ~ Other Person
